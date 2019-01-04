@@ -2,7 +2,7 @@
 
 /**  */
 const URL_DEVICES = "https://raw.githubusercontent.com/wzjwhut/alexa-camara-skill/master/mock/devices.json";
-const URL_RETRIEVE_URI = "";
+const URL_RETRIEVE_URI = "https://raw.githubusercontent.com/wzjwhut/alexa-camara-skill/master/mock/camera-uri.json";
 
 const https = require('https');
 function log(title, msg) {
@@ -30,81 +30,6 @@ function generateMessageID() {
     return '38A28869-DD5E-48CE-BBE5-' + randomString(12, 16); // Dummy
 }
 
-function generateResponse(name, payload) {
-    return {
-        header: {
-            messageId: generateMessageID(),
-            name: name,
-            namespace: 'Alexa.ConnectedHome.Control',
-            payloadVersion: '2',
-        },
-        payload: payload,
-    };
-}
-
-function mydevice2AlexDevice(list){
-    let discoveredDevices = new Array();
-    if(list == undefined || list == null){
-        return discoveredDevices;
-    }
-    return list;
-    // for(let device of list){
-    //
-    //     let d = {
-    //         // This id needs to be unique across all devices discovered for a given manufacturer
-    //         endpointId: device.id,
-    //         // Company name that produces and sells the smart home device
-    //         manufacturerName:'Eques',
-    //         // the model name of the endpoint
-    //         modelName:'VEIU',
-    //         // The name given by the user in your application. Examples include 'Bedroom light' etc
-    //         friendlyName:device.nick,
-    //         // This value will be shown in the Alexa app
-    //         description: 'Smart door camera from Eques Inc.',
-    //         // Indicates the group name where the device should display in the Alexa app
-    //         displayCategories: [ "CAMERA" ],
-    //         // String name/value pairs that provide additional information about a device for use by the skill.
-    //         cookie:{
-    //
-    //         },
-    //         // An array of capability objects that represents actions particular device supports and can respond to.
-    //         // A capability object can contain different fields depending on the type.
-    //         capabilities:[]
-    //     }
-    //
-    //     discoveredDevices.push(d);
-    // }
-
-    /*    for(let device of list){
-            let d = {
-            // This id needs to be unique across all devices discovered for a given manufacturer
-            applianceId: device.id,
-            // Company name that produces and sells the smart home device
-            manufacturerName: 'Eques',
-            // Model name of the device
-            modelName: 'VEIU',
-            // Version number of the product
-            version: '1.0',
-            // The name given by the user in your application. Examples include 'Bedroom light' etc
-            friendlyName: device.nick,
-            // Should describe the device type and the company/cloud provider.
-            // This value will be shown in the Alexa app
-            friendlyDescription: 'Smart door camera from Eques Inc.',
-            // Boolean value to represent the status sof the device at time of discovery
-            "isReachable": device.online?true:false,
-            "actions": [
-              "retrieveCameraStreamUri",
-            ],
-            "applianceTypes":[
-                   "CAMERA"
-            ],
-            };
-            discoveredDevices.push(d);
-
-        }*/
-    return discoveredDevices;
-}
-
 function responseDiscovery(callback, discoveredDevices){
     const response = {
         event:{
@@ -125,10 +50,8 @@ function responseDiscovery(callback, discoveredDevices){
 
 function handleDiscovery(request, callback) {
     log('DEBUG', `Discovery Request: ${JSON.stringify(request)}`);
-
     const userAccessToken = request.directive.payload.scope.token.trim();
-
-    let getDeviceListUrl = 'https://alexa-user.ecamzone.cc/eques/amazon/get-device-list-v3?access_token=' + userAccessToken;
+    let getDeviceListUrl = URL_DEVICES + '?access_token=' + userAccessToken;
     https.get(getDeviceListUrl, (res) => {
         var str = "";
         res.on('data', (d) => {
@@ -137,7 +60,7 @@ function handleDiscovery(request, callback) {
         res.on('end', function () {
             console.log("get device list result: " + str);
             let result = JSON.parse(str);
-            responseDiscovery(callback, mydevice2AlexDevice(result.list));
+            responseDiscovery(callback, result.list);
         });
     }).on('error', (e) => {
         console.error(e);
@@ -166,27 +89,36 @@ function handleRetrieveCameraUri(request, callback){
     const userAccessToken = request.directive.endpoint.scope.token.trim();
 
     let deviceId = request.directive.endpoint.endpointId;
-
-    /*  */
-    rtspDownstreamUrl = "rtsp://alexa-rtsp.ecamzone.cc:443/downstream/" + rtspToken;
-
-    responseRetrieveCameraUri(request, callback, 'Response', {
-        cameraStreams:[
-            {
-                uri: rtspDownstreamUrl,
-                // expirationTime: "2017-02-03T16:20:50.52Z",
-                idleTimeoutSeconds: 15,
-                protocol: "RTSP",
-                resolution: {
-                    width: 640,
-                    height: 480
-                },
-                authorizationType: "BASIC",
-                videoCodec: "H264",
-                audioCodec: "AAC"
-
-            }
-        ],
+    let url = URL_RETRIEVE_URI + '?access_token=' + userAccessToken + "&deviceId=" + deviceId;
+    https.get(url, (res) => {
+        var str = "";
+        res.on('data', (d) => {
+            str += d;
+        });
+        res.on('end', function () {
+            console.log("retrieve camera uri result: " + str);
+            let result = JSON.parse(str);
+            let rtspUri = result.uri;
+            responseRetrieveCameraUri(request, callback, 'Response', {
+                cameraStreams:[
+                    {
+                        uri: rtspUri,
+                        idleTimeoutSeconds: 15,
+                        protocol: "RTSP",
+                        resolution: {
+                            width: 640,
+                            height: 480
+                        },
+                        authorizationType: "BASIC",
+                        videoCodec: "H264",
+                        audioCodec: "AAC"
+                    }
+                ],
+            });
+        });
+    }).on('error', (e) => {
+        console.error(e);
+        responseDiscovery(callback, []);
     });
 }
 

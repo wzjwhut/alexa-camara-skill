@@ -80,4 +80,4 @@ const TEST_CALLBACK = function(arg0, response){
 };
 
 skill.handler(DISCOVER_REQUEST, null, TEST_CALLBACK);
-skill.handler(RETRIEVE_CAMERA_URI, null, TEST_CALLBACK);
+skill.handler(RETRIEVE_CAMERA_URI_REQUEST, null, TEST_CALLBACK);
