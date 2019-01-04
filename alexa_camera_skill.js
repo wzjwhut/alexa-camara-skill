@@ -1,5 +1,9 @@
 'use strict';
 
+/**  */
+const URL_DEVICES = "https://raw.githubusercontent.com/wzjwhut/alexa-camara-skill/master/mock/devices.json";
+const URL_RETRIEVE_URI = "";
+
 const https = require('https');
 function log(title, msg) {
     console.log(`[${title}] ${msg}`);
@@ -20,8 +24,7 @@ function randomString(len, bits)
         outStr += newStr.slice(0, Math.min(newStr.length, (len - outStr.length)));
     }
     return outStr.toUpperCase();
-};
-
+}
 
 function generateMessageID() {
     return '38A28869-DD5E-48CE-BBE5-' + randomString(12, 16); // Dummy
