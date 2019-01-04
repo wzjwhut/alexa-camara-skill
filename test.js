@@ -21,12 +21,12 @@ const DISCOVER_REQUEST = {
             "namespace": "Alexa.Discovery",
             "name": "Discover",
             "payloadVersion": "3",
-            "messageId": generateMessageID()
+            "messageId": "38A28869-DD5E-48CE-BBE5-00000000"
         },
         "payload": {
             "scope": {
                 "type": "BearerToken",
-                "token": "10c94b1af7e24392a23ac8aba5d2985d_N15Gt3qKL2dIwB54"
+                "token": "123456"
             }
         }
     }
@@ -39,14 +39,14 @@ const RETRIEVE_CAMERA_URI_REQUEST =
                 "namespace": "Alexa.CameraStreamController",
                 "name": "InitializeCameraStreams",
                 "payloadVersion": "3",
-                "messageId": generateMessageID(),
-                "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+                "messageId": "38A28869-DD5E-48CE-BBE5-00000001",
+                "correlationToken": "123456"
             },
             "endpoint": {
                 "endpointId": "98029b8000ef4f7524d80450bf4e9a15",
                 "scope": {
                     "type": "BearerToken",
-                    "token": "10c94b1af7e24392a23ac8aba5d2985d_N15Gt3qKL2dIwB54"
+                    "token": "123456"
                 },
                 "cookie": {}
             },

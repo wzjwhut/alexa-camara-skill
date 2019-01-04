@@ -60,7 +60,7 @@ function handleDiscovery(request, callback) {
         res.on('end', function () {
             console.log("get device list result: " + str);
             let result = JSON.parse(str);
-            responseDiscovery(callback, result.list);
+            responseDiscovery(callback, result);
         });
     }).on('error', (e) => {
         console.error(e);
